@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { History, Search, Filter, Calendar, TrendingUp, TrendingDown } from "lucide-react"
+import { useEffect, useState } from "react"
 import { HealthScoreCircle } from "@/components/dashboard/health-score-circle"
 import {
   LineChart,

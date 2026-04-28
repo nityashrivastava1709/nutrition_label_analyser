@@ -1,6 +1,7 @@
 "use client"
 
 import { Activity, TrendingUp, AlertTriangle, History, ArrowUpRight, ArrowDownRight } from "lucide-react"
+import { useState } from "react"
 import { HealthScoreCircle } from "@/components/dashboard/health-score-circle"
 import {
   LineChart,
@@ -62,7 +63,30 @@ const stats = [
 ]
 
 export default function OverviewPage() {
+  const [result, setResult] = useState<any>(null)
+
+ const handleUpload = async (event: any) => {
+  const file = event.target.files[0]
+
+  if (!file) return
+
+  const formData = new FormData()
+  formData.append("image", file)
+
+  try {
+    const response = await fetch("http://127.0.0.1:5000/analyze", {
+      method: "POST",
+      body: formData,
+    })
+
+    const data = await response.json()
+    setResult(data)
+  } catch (error) {
+    console.error("Upload error:", error)
+  }
+}
   return (
+    
     <div className="space-y-8">
       {/* Page header */}
       <div>
@@ -71,6 +95,37 @@ export default function OverviewPage() {
           Your nutrition overview and health insights
         </p>
       </div>
+
+      {/* 🔥 Upload Section */}
+<div className="bg-card rounded-2xl border border-border p-6">
+  <h3 className="text-lg font-semibold text-foreground mb-4">Upload Food Label</h3>
+
+  <input
+    type="file"
+    onChange={handleUpload}
+    className="mb-4"
+  />
+
+  {result && (
+    <div className="mt-4">
+      <h4 className="font-semibold">Health Score: {result.health_score}</h4>
+
+      <h5 className="mt-3 font-medium">Alerts:</h5>
+      <ul className="list-disc ml-5">
+        {result.alerts.map((a: string, i: number) => (
+          <li key={i}>{a}</li>
+        ))}
+      </ul>
+
+      <h5 className="mt-3 font-medium">Recommendations:</h5>
+      <ul className="list-disc ml-5">
+        {result.recommendations.map((r: string, i: number) => (
+          <li key={i}>{r}</li>
+        ))}
+      </ul>
+    </div>
+  )}
+</div>
 
       {/* Stats Grid */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">

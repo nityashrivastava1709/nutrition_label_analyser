@@ -28,6 +28,10 @@ def analyze():
     filepath = os.path.join(UPLOAD_FOLDER, file.filename)
     file.save(filepath)
 
+    # 🔥 Extract product name (simple method)
+    lines = text.split("\n")
+    name = lines[0] if lines else "Unknown Product"
+
     # Step 1: preprocess
     processed = preprocess_image(filepath)
 
@@ -46,20 +50,21 @@ def analyze():
     # Step 6: recommendations
     recs = generate_recommendations(data)
 
-    return jsonify({
-          result = {
+    result = {
+        "name": name,
          "text": text,
           "data": data,
          "health_score": score,
          "alerts": alerts,
          "recommendations": recs
-         }
+     }
+         
 
           # 🔥 Save to history
-         history.append(result)
+    history.append(result)
 
-         return jsonify(result)
-     })
+    return jsonify(result)
+     
 
 if __name__ == "__main__":
     app.run(debug=True)
