@@ -10,6 +10,10 @@ from utils.alerts import generate_alerts
 from utils.recommend import generate_recommendations
 
 app = Flask(__name__)
+from flask_cors import CORS
+
+CORS(app)
+
 history = []
 
 UPLOAD_FOLDER = "uploads"
@@ -65,10 +69,10 @@ def analyze():
 
     return jsonify(result)
      
+@app.route("/history", methods=["GET"])
+def get_history():
+    return jsonify(history)
 
 if __name__ == "__main__":
     app.run(debug=True)
 
-@app.route("/history", methods=["GET"])
-def get_history():
-    return jsonify(history)

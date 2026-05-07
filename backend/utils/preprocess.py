@@ -1,23 +1,24 @@
 import cv2
 
 def preprocess_image(image_path):
-    img = cv2.imread(image_path)
 
-    # Resize (important for OCR clarity)
-    img = cv2.resize(img, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+    image = cv2.imread(image_path)
+
+    # Resize for better OCR
+    image = cv2.resize(image, None, fx=3, fy=3)
 
     # Convert to grayscale
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # Denoise
-    blur = cv2.medianBlur(gray, 3)
+    # Sharpen image
+    gray = cv2.bilateralFilter(gray, 11, 17, 17)
 
-    # Adaptive threshold (better than fixed threshold)
-    thresh = cv2.adaptiveThreshold(
-        blur, 255,
-        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-        cv2.THRESH_BINARY,
-        11, 2
-    )
+    # Threshold
+    thresh = cv2.threshold(
+        gray,
+        150,
+        255,
+        cv2.THRESH_BINARY
+    )[1]
 
     return thresh

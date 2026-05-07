@@ -1,8 +1,8 @@
 "use client"
-
-import { useState } from "react"
-import { History, Search, Filter, Calendar, TrendingUp, TrendingDown } from "lucide-react"
 import { useEffect, useState } from "react"
+
+import { History, Search, Filter, Calendar, TrendingUp, TrendingDown } from "lucide-react"
+
 import { HealthScoreCircle } from "@/components/dashboard/health-score-circle"
 import {
   LineChart,
@@ -16,66 +16,7 @@ import {
 } from "recharts"
 
 const historyData = [
-  {
-    id: 1,
-    name: "Organic Granola Bar",
-    score: 85,
-    date: "2024-01-15",
-    category: "Excellent",
-    calories: 180,
-    protein: 6,
-    sugar: 8,
-  },
-  {
-    id: 2,
-    name: "Greek Yogurt",
-    score: 92,
-    date: "2024-01-14",
-    category: "Excellent",
-    calories: 120,
-    protein: 15,
-    sugar: 5,
-  },
-  {
-    id: 3,
-    name: "Protein Shake",
-    score: 78,
-    date: "2024-01-13",
-    category: "Good",
-    calories: 220,
-    protein: 25,
-    sugar: 12,
-  },
-  {
-    id: 4,
-    name: "Whole Grain Bread",
-    score: 71,
-    date: "2024-01-12",
-    category: "Good",
-    calories: 90,
-    protein: 4,
-    sugar: 2,
-  },
-  {
-    id: 5,
-    name: "Energy Drink",
-    score: 45,
-    date: "2024-01-11",
-    category: "Poor",
-    calories: 110,
-    protein: 0,
-    sugar: 28,
-  },
-  {
-    id: 6,
-    name: "Mixed Nuts",
-    score: 88,
-    date: "2024-01-10",
-    category: "Excellent",
-    calories: 170,
-    protein: 5,
-    sugar: 1,
-  },
+  
 ]
 
 const trendData = [
@@ -89,6 +30,14 @@ const trendData = [
 
 export default function HistoryPage() {
   const [searchQuery, setSearchQuery] = useState("")
+  const [historyData, setHistoryData] = useState([])
+  useEffect(() => {
+  fetch("http://127.0.0.1:5000/history")
+    .then((res) => res.json())
+    .then((data) => {
+      setHistoryData(data.reverse())
+    })
+}, [])
   const [selectedItem, setSelectedItem] = useState<typeof historyData[0] | null>(null)
 
   const filteredHistory = historyData.filter((item) =>

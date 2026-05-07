@@ -1,7 +1,7 @@
 "use client"
 
 import { Activity, TrendingUp, AlertTriangle, History, ArrowUpRight, ArrowDownRight } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { HealthScoreCircle } from "@/components/dashboard/health-score-circle"
 import {
   LineChart,
@@ -14,56 +14,17 @@ import {
   Area,
 } from "recharts"
 
-const weeklyData = [
-  { day: "Mon", score: 72, calories: 1800 },
-  { day: "Tue", score: 78, calories: 2100 },
-  { day: "Wed", score: 65, calories: 2400 },
-  { day: "Thu", score: 82, calories: 1900 },
-  { day: "Fri", score: 75, calories: 2200 },
-  { day: "Sat", score: 88, calories: 1700 },
-  { day: "Sun", score: 85, calories: 1950 },
-]
-
-const recentAnalyses = [
-  { name: "Organic Granola Bar", score: 85, date: "Today", category: "Excellent" },
-  { name: "Greek Yogurt", score: 92, date: "Yesterday", category: "Excellent" },
-  { name: "Protein Shake", score: 78, date: "2 days ago", category: "Good" },
-  { name: "Whole Grain Bread", score: 71, date: "3 days ago", category: "Good" },
-]
-
-const stats = [
-  {
-    label: "Avg Health Score",
-    value: "78",
-    change: "+5.2%",
-    positive: true,
-    icon: Activity,
-  },
-  {
-    label: "Products Analyzed",
-    value: "24",
-    change: "+12",
-    positive: true,
-    icon: History,
-  },
-  {
-    label: "Active Alerts",
-    value: "3",
-    change: "-2",
-    positive: true,
-    icon: AlertTriangle,
-  },
-  {
-    label: "Weekly Trend",
-    value: "Up",
-    change: "+8.3%",
-    positive: true,
-    icon: TrendingUp,
-  },
-]
 
 export default function OverviewPage() {
   const [result, setResult] = useState<any>(null)
+  const [historyData, setHistoryData] = useState<any[]>([])
+  useEffect(() => {
+  fetch("http://127.0.0.1:5000/history")
+    .then((res) => res.json())
+    .then((data) => {
+      setHistoryData(data.reverse())
+    })
+}, [])
 
  const handleUpload = async (event: any) => {
   const file = event.target.files[0]
@@ -84,7 +45,68 @@ export default function OverviewPage() {
   } catch (error) {
     console.error("Upload error:", error)
   }
-}
+}  
+     const recentAnalyses = historyData.slice(0, 5)
+       const stats = [
+  {
+    label: "Total Scans",
+    value: historyData.length,
+    change: "+12%",
+    positive: true,
+    icon: History,
+  },
+
+  {
+    label: "Average Score",
+    value:
+      historyData.length > 0
+        ? Math.round(
+            historyData.reduce(
+              (sum: number, item: any) =>
+                sum + item.health_score,
+              0
+            ) / historyData.length
+          )
+        : 0,
+    change: "+5%",
+    positive: true,
+    icon: Activity,
+  },
+
+  {
+    label: "High Score",
+    value:
+      historyData.length > 0
+        ? Math.max(
+            ...historyData.map(
+              (i: any) => i.health_score
+            )
+          )
+        : 0,
+    change: "+8%",
+    positive: true,
+    icon: TrendingUp,
+  },
+
+  {
+    label: "Alerts",
+    value: historyData.reduce(
+      (sum: number, item: any) =>
+        sum + (item.alerts?.length || 0),
+      0
+    ),
+    change: "-2%",
+    positive: false,
+    icon: AlertTriangle,
+  },
+]
+     
+     
+      const weeklyData = historyData.map((item: any, index: number) => ({
+        day: `Scan ${index + 1}`,
+       score: item.health_score || 0,
+       calories: item.data?.calories || 0,
+     }))
   return (
     
     <div className="space-y-8">
@@ -246,11 +268,11 @@ export default function OverviewPage() {
               className="flex items-center gap-4 p-4 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors cursor-pointer"
             >
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <span className="text-lg font-bold text-primary">{item.score}</span>
+                <span className="text-lg font-bold text-primary">{item.health_score}</span>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-foreground truncate">{item.name}</p>
-                <p className="text-sm text-muted-foreground">{item.date}</p>
+                <p className="text-sm text-muted-foreground">{item.timestamp}</p>
               </div>
               <div
                 className={`px-3 py-1 rounded-full text-xs font-medium ${
