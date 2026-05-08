@@ -41,7 +41,11 @@ export default function OverviewPage() {
     })
 
     const data = await response.json()
-    setResult(data)
+   setResult(data)
+   setHistoryData((prev: any) => [
+    data,
+    ...prev,
+])
   } catch (error) {
     console.error("Upload error:", error)
   }

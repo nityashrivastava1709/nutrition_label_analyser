@@ -201,9 +201,9 @@ export default function HistoryPage() {
 
         {/* Product List */}
         <div className="space-y-3">
-          {filteredHistory.map((item) => (
+          {filteredHistory.map((item, index) => ( 
             <div
-              key={item.id}
+              key={index}
               onClick={() => setSelectedItem(selectedItem?.id === item.id ? null : item)}
               className={`p-4 rounded-xl border transition-all cursor-pointer ${
                 selectedItem?.id === item.id
@@ -227,11 +227,11 @@ export default function HistoryPage() {
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {new Date(item.date).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
+                    {
+                        item.timestamp
+                        ? new Date(item.timestamp).toLocaleString()
+                        : "No date available"
+                    }
                   </p>
                 </div>
                 <div className="hidden sm:flex items-center gap-6 text-sm">

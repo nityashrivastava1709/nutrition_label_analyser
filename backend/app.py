@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
 import os
 import cv2
+from datetime import datetime
+from flask_cors import CORS
 
 from utils.preprocess import preprocess_image
 from utils.ocr import extract_text
@@ -10,6 +12,7 @@ from utils.alerts import generate_alerts
 from utils.recommend import generate_recommendations
 
 app = Flask(__name__)
+CORS(app)
 from flask_cors import CORS
 
 CORS(app)
@@ -32,16 +35,16 @@ def analyze():
     filepath = os.path.join(UPLOAD_FOLDER, file.filename)
     file.save(filepath)
 
-    # 🔥 Extract product name (simple method)
-    lines = text.split("\n")
-    name = lines[0] if lines else "Unknown Product"
-
     # Step 1: preprocess
     processed = preprocess_image(filepath)
 
     # Step 2: OCR
     text = extract_text(processed)
 
+     # 🔥 Extract product name (simple method)
+    lines = text.split("\n")
+    name = lines[0] if lines else "Unknown Product"
+    
     # Step 3: parse
     data = parse_nutrition(text)
 
@@ -60,7 +63,8 @@ def analyze():
           "data": data,
          "health_score": score,
          "alerts": alerts,
-         "recommendations": recs
+         "recommendations": recs,
+         "timestamp": datetime.now().isoformat(),
      }
          
 

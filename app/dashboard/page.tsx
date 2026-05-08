@@ -32,53 +32,59 @@ export default function DashboardPage() {
     setIsAnalyzing(true)
     
     // Simulate AI analysis
-    await new Promise((resolve) => setTimeout(resolve, 3000))
-    
-    // Mock result
-    const mockResult: AnalysisResult = {
-      score: Math.floor(Math.random() * 40) + 60, // 60-100
-      category: "Good",
-      productName: file.name.replace(/\.[^/.]+$/, "") || "Analyzed Product",
-      nutrients: {
-        calories: Math.floor(Math.random() * 300) + 100,
-        protein: Math.floor(Math.random() * 25) + 5,
-        carbohydrates: Math.floor(Math.random() * 50) + 10,
-        totalFat: Math.floor(Math.random() * 20) + 5,
-        saturatedFat: Math.floor(Math.random() * 10) + 2,
-        sugar: Math.floor(Math.random() * 25) + 5,
-        fiber: Math.floor(Math.random() * 10) + 2,
-        sodium: Math.floor(Math.random() * 800) + 100,
-        cholesterol: Math.floor(Math.random() * 50) + 10,
-      },
-      alerts: [],
-    }
+    try {
+    const formData = new FormData()
+    formData.append("image", file)
 
-    // Determine category based on score
-    if (mockResult.score >= 85) mockResult.category = "Excellent"
-    else if (mockResult.score >= 70) mockResult.category = "Good"
-    else if (mockResult.score >= 50) mockResult.category = "Moderate"
-    else mockResult.category = "Poor"
+    const response = await fetch(
+      "http://127.0.0.1:5000/analyze",
+     {
+        method: "POST",
+       body: formData,
+      }
+    )
 
-    // Generate alerts
-    if (mockResult.nutrients.sodium > 600) {
-      mockResult.alerts.push("High sodium content detected")
-    }
-    if (mockResult.nutrients.sugar > 20) {
-      mockResult.alerts.push("Sugar exceeds recommended daily limit")
-    }
-    if (mockResult.nutrients.saturatedFat > 8) {
-      mockResult.alerts.push("High saturated fat content")
-    }
-    if (mockResult.nutrients.cholesterol > 40) {
-      mockResult.alerts.push("Cholesterol above recommended limit")
-    }
+     const data = await response.json()
 
-    setAnalysisResult(mockResult)
+     const formattedResult: AnalysisResult = {
+       score: data.health_score,
+
+       category:
+       data.health_score >= 85
+        ? "Excellent"
+        : data.health_score >= 70
+        ? "Good"
+        : data.health_score >= 50
+        ? "Moderate"
+        : "Poor",
+
+       productName: data.name,
+
+       nutrients: {
+         calories: data.data.calories || 0,
+         protein: data.data.protein || 0,
+         carbohydrates: data.data.carbs || 0,
+         totalFat: data.data.fat || 0,
+         saturatedFat: 0,
+         sugar: data.data.sugar || 0,
+         fiber: data.data.fiber || 0,
+         sodium: data.data.sodium || 0,
+         cholesterol: 0,
+        },
+
+       alerts: data.alerts || [],
+      }
+
+     setAnalysisResult(formattedResult)
+
+     }     catch (error) {
+     console.error("Upload error:", error)
+      }
+
     setIsAnalyzing(false)
-  }
-
-  return (
-    <div className="space-y-8">
+    }
+     return (
+     <div className="space-y-8">
       {/* Page header */}
       <div>
         <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
@@ -97,5 +103,5 @@ export default function DashboardPage() {
         <AnalysisPanel result={analysisResult} isAnalyzing={isAnalyzing} />
       </div>
     </div>
-  )
-}
+    )
+  }
